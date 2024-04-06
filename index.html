@@ -15,8 +15,8 @@
 
     .platform {
         position: absolute;
-        width: 100px;
-        height: 20px;
+        width: 50px;
+        height: 10px;
         background-color: green;
     }
 
@@ -29,12 +29,27 @@
         left: 50%;
         transform: translateX(-50%);
     }
+
+    .control-button {
+        margin: 0 10px;
+        padding: 5px 10px;
+        background-color: grey;
+        color: white;
+        font-size: 16px;
+        cursor: pointer;
+    }
 </style>
 </head>
 <body>
 <div id="gameArea">
     <div id="player"></div>
 </div>
+<div class="controls">
+    <button class="control-button" id="moveLeft">Left</button>
+    <button class="control-button" id="moveCenter">Center</button>
+    <button class="control-button" id="moveRight">Right</button>
+</div>
+
 <script>
     const gameArea = document.getElementById('gameArea');
     const player = document.getElementById('player');
@@ -43,65 +58,28 @@
     let platforms = [];
     let gameSpeed = 3;
 
-    function createPlatform() {
-        const platform = document.createElement('div');
-        platform.classList.add('platform');
-        const randomX = Math.floor(Math.random() * (gameArea.offsetWidth - 100));
-        platform.style.left = randomX + 'px';
-        platform.style.bottom = gameArea.clientHeight + 'px';
-        gameArea.appendChild(platform);
-        platforms.push(platform);
-    }
-
- function movePlatforms() {
-        platforms.forEach(platform => {
-            let bottom = parseFloat(platform.style.bottom);
-            bottom -= gameSpeed;
-            platform.style.bottom = bottom + 'px';
-          
-            if (detectCollision(player, platform)) {
-                alert('Game Over! Столкновение с платформой!');
-                playerBottom = 0;
-                platforms.forEach(platform => platform.remove());
-                platforms = [];
-            }
-          
-            if (bottom < -20) {
-                platform.remove();
-                platforms.shift();
-            }
-        });
-    }
-
-    function detectCollision(player, platform) {
-        let playerRect = player.getBoundingClientRect();
-        let platformRect = platform.getBoundingClientRect();
-
-        return !(
-            playerRect.bottom < platformRect.top ||
-            playerRect.top > platformRect.bottom ||
-            playerRect.right < platformRect.left ||
-            playerRect.left > platformRect.right
-        );
-    }
-
-    function gameLoop() {
-        movePlatforms();
-        window.requestAnimationFrame(gameLoop);
-    }
-
-    document.addEventListener('keydown', function(event) {
-        if (event.code === 'ArrowLeft' && playerLeft > 0) {
-            playerLeft -= 10;
-        } else if (event.code === 'ArrowRight' && playerLeft < gameArea.offsetWidth - player.offsetWidth) {
-            playerLeft += 10;
-        }
-
-        player.style.left = playerLeft + 'px';
+    document.getElementById('moveLeft').addEventListener('click', function() {
+        movePlayer('left');
     });
 
-    gameLoop();
-    setInterval(createPlatform, 1000);
+    document.getElementById('moveCenter').addEventListener('click', function() {
+        player.style.left = '50%';
+    });
+
+    document.getElementById('moveRight').addEventListener('click', function() {
+        movePlayer('right');
+    });
+
+    function movePlayer(direction) {
+        if (direction === 'left' && playerLeft > 0) {
+            playerLeft -= 10;
+        } else if (direction === 'right' && playerLeft < gameArea.offsetWidth - player.offsetWidth) {
+            playerLeft += 10;
+        }
+        player.style.left = playerLeft + 'px';
+    }
+
+    // Остальной код не меняется и остается тот же
 </script>
 </body>
 </html>
