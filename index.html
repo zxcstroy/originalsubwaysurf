@@ -30,6 +30,11 @@
         transform: translateX(-50%);
     }
 
+    .control-buttons {
+        text-align: center;
+        margin-top: 20px;
+    }
+
     .control-button {
         margin: 0 10px;
         padding: 5px 10px;
@@ -41,14 +46,12 @@
 </style>
 </head>
 <body>
-<div id="gameArea">
-    <div id="player"></div>
-</div>
-<div class="controls">
+<div class="control-buttons">
     <button class="control-button" id="moveLeft">Left</button>
     <button class="control-button" id="moveCenter">Center</button>
     <button class="control-button" id="moveRight">Right</button>
 </div>
+<div id="gameArea"></div>
 
 <script>
     const gameArea = document.getElementById('gameArea');
@@ -59,7 +62,7 @@
     let gameSpeed = 3;
 
     document.getElementById('moveLeft').addEventListener('click', function() {
-        movePlayer('left');
+        player.style.left = '10%';
     });
 
     document.getElementById('moveCenter').addEventListener('click', function() {
@@ -67,19 +70,51 @@
     });
 
     document.getElementById('moveRight').addEventListener('click', function() {
-        movePlayer('right');
+        player.style.left = '90%';
     });
 
-    function movePlayer(direction) {
-        if (direction === 'left' && playerLeft > 0) {
-            playerLeft -= 10;
-        } else if (direction === 'right' && playerLeft < gameArea.offsetWidth - player.offsetWidth) {
-            playerLeft += 10;
-        }
-        player.style.left = playerLeft + 'px';
+    function createPlatform() {
+        const platform = document.createElement('div');
+        platform.classList.add('platform');
+        const randomX = Math.floor(Math.random() * (gameArea.offsetWidth - 100));
+        platform.style.left = randomX + 'px';
+        platform.style.top = '0';
+        gameArea.appendChild(platform);
+        platforms.push(platform);
     }
 
-    // Остальной код не меняется и остается тот же
+    function movePlatforms() {
+        platforms.forEach(platform => {
+            let bottom = parseFloat(platform.style.top);
+            bottom += gameSpeed;
+            platform.style.top = bottom + 'px';
+          
+            if (detectCollision(player, platform)) {
+                alert('Game Over! Столкновение с платформой!');
+                player.style.left = '50%';
+            }
+        });
+    }
+
+    function detectCollision(player, platform) {
+        let playerRect = player.getBoundingClientRect();
+        let platformRect = platform.getBoundingClientRect();
+
+        return !(
+            playerRect.bottom < platformRect.top ||
+            playerRect.top > platformRect.bottom ||
+            playerRect.right < platformRect.left ||
+            playerRect.left > platformRect.right
+        );
+    }
+
+    function gameLoop() {
+        movePlatforms();
+        window.requestAnimationFrame(gameLoop);
+    }
+
+    gameLoop();
+    setInterval(createPlatform, 1000);
 </script>
 </body>
 </html>
