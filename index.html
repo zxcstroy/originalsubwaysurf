@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Бегущий человечек</title>
+<style>
+    #gameArea {
+        width: 100%;
+        height: 100vh;
+        background-color: lightblue;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .platform {
+        position: absolute;
+        width: 100px;
+        height: 20px;
+        background-color: green;
+    }
+
+    #player {
+        position: absolute;
+        width: 50px;
+        height: 50px;
+        background-color: red;
+        bottom: 0;
+        left: 50%;
+        transform: translateX(-50%);
+    }
+</style>
+</head>
+<body>
+<div id="gameArea">
+    <div id="player"></div>
+</div>
+<script>
+    const gameArea = document.getElementById('gameArea');
+    const player = document.getElementById('player');
+    let playerLeft = 50;
+    let playerBottom = 0;
+    let platforms = [];
+    let gameSpeed = 3;
+
+    function createPlatform() {
+        const platform = document.createElement('div');
+        platform.classList.add('platform');
+        const randomX = Math.floor(Math.random() * (gameArea.offsetWidth - 100));
+        platform.style.left = randomX + 'px';
+        platform.style.bottom = gameArea.clientHeight + 'px';
+        gameArea.appendChild(platform);
+        platforms.push(platform);
+    }
+
+ function movePlatforms() {
+        platforms.forEach(platform => {
+            let bottom = parseFloat(platform.style.bottom);
+            bottom -= gameSpeed;
+            platform.style.bottom = bottom + 'px';
+          
+            if (detectCollision(player, platform)) {
+                alert('Game Over! Столкновение с платформой!');
+                playerBottom = 0;
+                platforms.forEach(platform => platform.remove());
+                platforms = [];
+            }
+          
+            if (bottom < -20) {
+                platform.remove();
+                platforms.shift();
+            }
+        });
+    }
+
+    function detectCollision(player, platform) {
+        let playerRect = player.getBoundingClientRect();
+        let platformRect = platform.getBoundingClientRect();
+
+        return !(
+            playerRect.bottom < platformRect.top ||
+            playerRect.top > platformRect.bottom ||
+            playerRect.right < platformRect.left ||
+            playerRect.left > platformRect.right
+        );
+    }
+
+    function gameLoop() {
+        movePlatforms();
+        window.requestAnimationFrame(gameLoop);
+    }
+
+    document.addEventListener('keydown', function(event) {
+        if (event.code === 'ArrowLeft' && playerLeft > 0) {
+            playerLeft -= 10;
+        } else if (event.code === 'ArrowRight' && playerLeft < gameArea.offsetWidth - player.offsetWidth) {
+            playerLeft += 10;
+        }
+
+        player.style.left = playerLeft + 'px';
+    });
+
+    gameLoop();
+    setInterval(createPlatform, 1000);
+</script>
+</body>
+</html>
